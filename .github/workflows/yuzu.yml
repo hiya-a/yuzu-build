@@ -173,7 +173,7 @@ jobs:
           artifacts: "yuzu-windows.7z"
           name: "${{ env.time }}"
           body: "${{ env.body }}"
-          tag: "release"
+          tag: "${{ env.BUILD_TAG }}"
           allowUpdates: true
           artifactErrorsFailBuild: false
           prerelease: false
