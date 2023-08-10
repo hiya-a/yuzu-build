@@ -1,5 +1,5 @@
 diff --git a/.ci/scripts/windows/upload.ps1 b/.ci/scripts/windows/upload.ps1
-index 492763420..59492af30 100644
+index 492763420..6387f6022 100644
 --- a/.ci/scripts/windows/upload.ps1
 +++ b/.ci/scripts/windows/upload.ps1
 @@ -36,9 +36,9 @@ if (Test-Path -Path ".\build\bin\Release") {
@@ -28,3 +28,12 @@ index 492763420..59492af30 100644
  
  # Following section is quick hack to package artifacts differently for GitHub Actions
  if ("$env:GITHUB_ACTIONS" -eq "true") {
+@@ -85,7 +85,7 @@ if ("$env:GITHUB_ACTIONS" -eq "true") {
+         }
+     } else {
+         # If env:PR_NUMBER isn't set, we should still write out a variable
+-        $BUILD_TAG = "verify-$GITDATE-$GITREV"
++        $BUILD_TAG = "$GITDATE-$GITREV"
+     }
+     echo "BUILD_TAG=$BUILD_TAG"
+     echo "BUILD_TAG=$BUILD_TAG" >> $env:GITHUB_ENV
