@@ -4,6 +4,12 @@ run-name: 'Build yuzu'
 on:
   workflow_dispatch:
     inputs:
+      build_type:
+        description: 'build type'
+        required: true
+        default: 'yuzu-ea'
+        type: choice
+        options: ['yuzu-ea', 'yuzu-mainline']
       optimization_flag:
         description: 'OPTIMIZATION_FLAG'
         required: true
@@ -73,10 +79,18 @@ jobs:
           YUZU_CRASH_DUMPS: ${{ inputs.yuzu_crash_dumps }}
           SHADOWFLICKERPATCH: ${{ inputs.shadowFlickerPatch }}
     steps:
-      - name: Checkout
+      - name: Checkout yuzu-ea
+        if: ${{ inputs.build_type == 'yuzu-ea' }}
         uses: actions/checkout@v3
         with:
           repository: yuzu-emu/yuzu
+          submodules: recursive
+          fetch-depth: 0
+      - name: Checkout yuzu-mainline
+        if: ${{ inputs.build_type == 'yuzu-mainline' }}
+        uses: actions/checkout@v3
+        with:
+          repository: yuzu-emu/yuzu-mainline
           submodules: recursive
           fetch-depth: 0
       - name: Checkout patches
@@ -110,6 +124,7 @@ jobs:
               git apply "$file"
           }
       - name: Configure git
+        if: ${{ inputs.build_type == 'yuzu-ea' }}
         run: |
           git config --global user.email "yuzu@yuzu-emu.org"
           git config --global user.name "yuzubot"
@@ -120,6 +135,7 @@ jobs:
         shell: pwsh
         run: .\.ci\scripts\windows\install-vulkan-sdk.ps1
       - name: Merge PRs
+        if: ${{ inputs.build_type == 'yuzu-ea' }}
         uses: actions/github-script@v6
         with: 
           script: |
