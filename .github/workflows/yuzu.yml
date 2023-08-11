@@ -163,7 +163,7 @@ jobs:
         id: cache-cmake-restore
         with:
           path: build
-          key: ${{ runner.os }}-cmake-${{ hashFiles('CMakeLists.txt') }}
+          key: ${{ inputs.build_type }}-cmake-${{ hashFiles('CMakeLists.txt') }}
       - name: Configure
         env:
           CC: cl.exe
