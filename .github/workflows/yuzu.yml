@@ -119,7 +119,6 @@ jobs:
           foreach ($file in $patchFiles) {
               git apply "$file"
           }
-          git submodule status > submodule.status
       - name: Configure git
         if: ${{ inputs.build_type == 'yuzu-ea' }}
         run: |
@@ -153,8 +152,9 @@ jobs:
             let body = await myExec(`GIT_BRANCH=$(git name-rev --name-only HEAD) && git log origin/$GIT_BRANCH..$GIT_BRANCH --pretty=format:"%s"`)
             core.exportVariable("body",body);
             core.exportVariable("time",new Date().toISOString().slice(0,16))
-      - name: Set up MSVC
-        uses: ilammy/msvc-dev-cmd@v1
+      - name: Prepare modules restoration
+        shell: pwsh
+        run: git submodule status > submodule.status
       - name: Restore modules cache
         uses: actions/cache/restore@v3
         id: cache-modules-restore
@@ -170,6 +170,8 @@ jobs:
         with:
           path: build
           key: ${{ inputs.build_type }}-cmake-${{ hashFiles('CMakeLists.txt', 'src/**/CMakeLists.txt') }}
+      - name: Set up MSVC
+        uses: ilammy/msvc-dev-cmd@v1
       - name: Configure
         env:
           CC: cl.exe
