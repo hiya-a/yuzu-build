@@ -84,6 +84,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: yuzu-emu/yuzu
+          fetch-depth: 0
       - name: Checkout yuzu-mainline
         if: ${{ inputs.build_type == 'yuzu-mainline' }}
         uses: actions/checkout@v3
@@ -115,7 +116,7 @@ jobs:
               git apply .\patches\optionalPatches\shadowFlicker.patch
           }
 
-          $patchFiles = Get-ChildItem ".\patches\defaultPatches\"
+          $patchFiles = Get-ChildItem -Path ".\patches\defaultPatches\*.patch"
           foreach ($file in $patchFiles) {
               git apply "$file"
           }
@@ -143,7 +144,7 @@ jobs:
               per_page: 100
             }).then(res => res.data.items);
             for (const pr of prs) {
-              console.log(`Merge "${pr.title}" ${pr.pull_request.html_url}`);
+              console.log(`Merge "${pr.title}" ${pr.pull_request.html_url} --depth 1`);
               let pn = pr.number;
               await myExec(`git fetch "https://github.com/yuzu-emu/yuzu.git" "pull/${pn}/head:pr-${pn}" -f --no-recurse-submodules`);
               await myExec(`git merge --squash "pr-${pn}"`)
@@ -206,6 +207,7 @@ jobs:
           .\.ci\scripts\windows\upload.ps1
           cd artifacts
           echo "${{ toJSON(inputs) }}" >> BuildConfig.json
+          git diff > AppliedPatches.diff
           7z a -m0=lzma2 -mx=9 -ms=on ..\yuzu-windows.7z *
       - name: Upload 7z
         uses: actions/upload-artifact@v3
