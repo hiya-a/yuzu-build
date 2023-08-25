@@ -167,10 +167,10 @@ jobs:
           key: ${{ inputs.build_type }}-modules-${{ hashFiles('submodule.status') }}
       - name: Restore cmake cache
         uses: actions/cache/restore@v3
-        id: cache-cmake-restore
+        id: cache-cmakeninja-restore
         with:
           path: build
-          key: ${{ inputs.build_type }}-cmake-${{ hashFiles('CMakeLists.txt', 'src/**/CMakeLists.txt') }}
+          key: ${{ inputs.build_type }}-cmakeninja-${{ hashFiles('CMakeLists.txt', 'src/**/CMakeLists.txt') }}
       - name: Set up MSVC
         uses: ilammy/msvc-dev-cmd@v1
       - name: Configure
@@ -194,10 +194,10 @@ jobs:
           key: ${{ steps.cache-modules-restore.outputs.cache-primary-key }}
       - name: Save cmake cache
         uses: actions/cache/save@v3
-        if: steps.cache-cmake-restore.outputs.cache-hit != 'true'
+        if: steps.cache-cmakeninja-restore.outputs.cache-hit != 'true'
         with:
           path: build
-          key: ${{ steps.cache-cmake-restore.outputs.cache-primary-key }}
+          key: ${{ steps.cache-cmakeninja-restore.outputs.cache-primary-key }}
       - name: Build
         run: cmake --build build
       - name: Pack 7z
