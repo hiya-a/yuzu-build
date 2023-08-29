@@ -78,6 +78,7 @@ jobs:
           YUZU_ROOM: ${{ inputs.yuzu_room }}
           YUZU_CRASH_DUMPS: ${{ inputs.yuzu_crash_dumps }}
           SHADOWFLICKERPATCH: ${{ inputs.shadowFlickerPatch }}
+          ZSTD_CLEVEL: 1
     steps:
       - name: Checkout yuzu-ea
         if: ${{ inputs.build_type == 'yuzu-ea' }}
@@ -164,13 +165,13 @@ jobs:
             externals
             .git\modules
             .git\config
-          key: ${{ inputs.build_type }}-modules-${{ hashFiles('submodule.status') }}
+          key: modules-${{ hashFiles('submodule.status') }}
       - name: Restore cmake cache
         uses: actions/cache/restore@v3
         id: cache-cmakeninja-restore
         with:
           path: build
-          key: ${{ inputs.build_type }}-cmakeninja-${{ hashFiles('CMakeLists.txt', 'src/**/CMakeLists.txt') }}
+          key: cmakeninja-${{ hashFiles('CMakeLists.txt', 'src/**/CMakeLists.txt') }}
       - name: Set up MSVC
         uses: ilammy/msvc-dev-cmd@v1
       - name: Configure
