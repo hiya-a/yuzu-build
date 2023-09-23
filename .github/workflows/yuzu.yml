@@ -161,7 +161,7 @@ jobs:
         id: cache-cmake-restore
         with:
           path: build
-          key: cmake3-${{ hashFiles('CMakeModules/*.cmake') }}
+          key: cmake3-${{ hashFiles('vcpkg.json', 'CMakeModules/*.cmake') }}
       - name: Set up MSVC
         uses: ilammy/msvc-dev-cmd@v1
       - name: Configure
