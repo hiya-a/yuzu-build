@@ -140,7 +140,7 @@ jobs:
           git submodule update --init externals/vcpkg
           git submodule update --init --recursive --depth 1
       - name: Checkout patches
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: 'patches'
       - name: Apply patches
