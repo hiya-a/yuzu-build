@@ -84,7 +84,7 @@ jobs:
           git config --global fetch.prune true
       - name: Install Vulkan SDK
         run: .\.ci\scripts\windows\install-vulkan-sdk.ps1
-      - name: Merge PRs
+      - name: Merge EA PRs and additional ${{ inputs.custom_prs }}
         if: ${{ inputs.repo_source != 'yuzu-emu/yuzu-mainline' }}
         uses: actions/github-script@v6
         with: 
