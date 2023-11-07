@@ -1,5 +1,4 @@
-name: 'yuzu'
-run-name: 'Build yuzu'
+name: Build yuzu
 
 on:
   workflow_dispatch:
@@ -83,7 +82,10 @@ jobs:
           git config --global rebase.autoStash true
           git config --global fetch.prune true
       - name: Install Vulkan SDK
-        run: .\.ci\scripts\windows\install-vulkan-sdk.ps1
+        uses: humbletim/install-vulkan-sdk@v1.1.1
+        with:
+          version: 1.3.250.1
+          cache: true
       - name: Merge EA PRs and additional ${{ inputs.custom_prs }}
         if: ${{ inputs.repo_source != 'yuzu-emu/yuzu-mainline' }}
         uses: actions/github-script@v6
@@ -168,12 +170,11 @@ jobs:
           foreach ($file in $patchFiles) {
               git apply "$file"
           }
-      - name: Restore cmake cache
-        uses: actions/cache/restore@v3
-        id: cache-cmake-restore
+      - name: Restore or setup vcpkg
+        uses: lukka/run-vcpkg@v11
         with:
-          path: build
-          key: cmake3-${{ hashFiles('vcpkg.json', 'CMakeModules/*.cmake') }}
+          vcpkgDirectory: '${{ github.workspace }}/externals/vcpkg'
+          vcpkgJsonGlob: 'vcpkg.json'
       - name: Set up MSVC
         uses: ilammy/msvc-dev-cmd@v1
       - name: Configure
@@ -183,13 +184,7 @@ jobs:
         run: |
           glslangValidator --version
           mkdir build -ErrorAction SilentlyContinue
-          cmake . -B build -GNinja -DCMAKE_POLICY_DEFAULT_CMP0069=NEW -DYUZU_ENABLE_LTO=ON -DYUZU_USE_BUNDLED_QT=1 -DYUZU_USE_BUNDLED_SDL2=1 -DYUZU_USE_QT_WEB_ENGINE="${{inputs.yuzu_use_qt_web_engine}}" -DYUZU_TESTS=OFF -DUSE_DISCORD_PRESENCE="${{inputs.use_discord_presence}}" -DENABLE_QT_TRANSLATION=ON -DDISPLAY_VERSION=${{ inputs.repo_source == 'yuzu-emu/yuzu-mainline' && 'mainline' || 'early-access' }} -DGIT_BRANCH=${{ inputs.repo_source }} -DCMAKE_BUILD_TYPE=Release -DENABLE_CUBEB="${{inputs.enable_cubeb}}" -DENABLE_LIBUSB="${{inputs.enable_libusb}}" -DENABLE_WEB_SERVICE="${{inputs.enable_web_service}}" -DYUZU_ROOM="${{inputs.yuzu_room}}"
-      - name: Save cmake cache
-        uses: actions/cache/save@v3
-        if: steps.cache-cmake-restore.outputs.cache-hit != 'true'
-        with:
-          path: build
-          key: ${{ steps.cache-cmake-restore.outputs.cache-primary-key }}
+          cmake . -B build -GNinja -DCMAKE_POLICY_DEFAULT_CMP0069=NEW -DYUZU_ENABLE_LTO=ON -DYUZU_USE_BUNDLED_QT=1 -DYUZU_USE_BUNDLED_SDL2=1 -DYUZU_USE_QT_WEB_ENGINE="${{inputs.yuzu_use_qt_web_engine}}" -DYUZU_TESTS=OFF -DUSE_DISCORD_PRESENCE="${{inputs.use_discord_presence}}" -DENABLE_QT_TRANSLATION=ON -DDISPLAY_VERSION=${{ inputs.repo_source == 'yuzu-emu/yuzu-mainline' && 'mainline' || 'early-access' }} -DGIT_BRANCH=${{ inputs.repo_source }} -DCMAKE_BUILD_TYPE=Release -DENABLE_CUBEB="${{inputs.enable_cubeb}}" -DENABLE_LIBUSB="${{inputs.enable_libusb}}" -DENABLE_WEB_SERVICE="${{inputs.enable_web_service}}" -DYUZU_ROOM="${{inputs.yuzu_room}}" 
       - name: Build
         run: cmake --build build -j $env:NUMBER_OF_PROCESSORS
       - name: Pack 7z
